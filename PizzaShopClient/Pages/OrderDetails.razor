@@ -1,0 +1,89 @@
+﻿@page "/myorders/{orderid:int}"
+
+@using System.Threading
+@using BlazingPizza.ComponentsLibrary.Map
+@using Microsoft.AspNetCore.Authorization;
+
+@inject IPizzaService _pizzaService;
+@implements IDisposable
+@attribute [Authorize]
+
+<h3>OrderDetails</h3>
+<div class="main">
+    @if (invalidOrder)
+    {
+        <h2>Nope</h2>
+        <p>Sorry, this order could not be loaded.</p>
+    }
+    else if (orderWithStatus == null)
+    {
+        <text>Loading...</text>
+    }
+    else
+    {
+        <div class="track-order">
+            <div class="track-order-title">
+                <h2>
+                    Order placed @orderWithStatus.Order.CreatedTime.ToLongDateString()
+                </h2>
+                <p class="ml-auto mb-0">
+                    Status: <strong>@orderWithStatus.StatusText</strong>
+                </p>
+            </div>
+            <div class="track-order-body">
+                <div class="track-order-details">
+                    <OrderReview Order="@orderWithStatus.Order" />
+                </div>
+                <div class="track-order-map">
+                    <Map Zoom="13" Markers="@orderWithStatus.MapMarkers" />
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@functions {
+    [Parameter] public int OrderId { get; set; }
+
+    OrderWithStatus orderWithStatus = new();
+    bool invalidOrder;
+    CancellationTokenSource pollingCancellationToken = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // If we were already polling for a different order, stop doing so
+        pollingCancellationToken?.Cancel();
+
+         // Start a new poll loop
+        await PollForUpdates();
+    }
+
+    void IDisposable.Dispose()
+    {
+        pollingCancellationToken?.Cancel();
+    }
+
+    private async Task PollForUpdates()
+    {
+        pollingCancellationToken = new CancellationTokenSource();
+        while (!pollingCancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                invalidOrder = false;
+                var response= await _pizzaService.GetOrderWithStatus(OrderId);
+                orderWithStatus = response.DataResult;
+            }
+            catch (Exception ex)
+            {
+                invalidOrder = true;
+                pollingCancellationToken.Cancel();
+                Console.Error.WriteLine(ex);
+            }
+
+            StateHasChanged();
+
+            await Task.Delay(4000);
+        }
+    }
+}
