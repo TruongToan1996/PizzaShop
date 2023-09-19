@@ -1,4 +1,7 @@
-﻿@inject IPizzaService _pizzaService;
+﻿@using PizzaShop.Shared;
+@using PizzaShopClient.Services;
+@inject IPizzaService _pizzaService;
+@using Microsoft.AspNetCore.Components.Web
 
 <h3>ConfiguredPizzaItem</h3>
 
@@ -20,5 +23,8 @@
 @code {
 
     [Parameter] public Pizza Pizza { get; set; }
-    [Parameter] public EventCallback OnRemoved { get; set; }  
+    [Parameter] public EventCallback OnRemoved { get; set; }
+
+
 }
+

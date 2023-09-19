@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BlazingPizza.ComponentsLibrary\BlazingPizza.ComponentsLibrary.csproj" />
+    <ProjectReference Include="..\BlazingPizza.ComponentsLibrary1\BlazingPizza.ComponentsLibrary1.csproj" />
   </ItemGroup>
 
 </Project>

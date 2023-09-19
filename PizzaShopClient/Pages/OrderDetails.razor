@@ -1,12 +1,15 @@
 ﻿@page "/myorders/{orderid:int}"
-
 @using System.Threading
-@using BlazingPizza.ComponentsLibrary.Map
 @using Microsoft.AspNetCore.Authorization;
-
-@inject IPizzaService _pizzaService;
+@using PizzaShop.Shared;
+@using PizzaShopClient.Services;
 @implements IDisposable
-@attribute [Authorize]
+@inject IPizzaService _pizzaService;
+
+
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+@using Microsoft.JSInterop;
 
 <h3>OrderDetails</h3>
 <div class="main">
@@ -24,7 +27,7 @@
         <div class="track-order">
             <div class="track-order-title">
                 <h2>
-                    Order placed @orderWithStatus.Order.CreatedTime.ToLongDateString()
+                    Order placed @orderWithStatus.Order.CreatedTime
                 </h2>
                 <p class="ml-auto mb-0">
                     Status: <strong>@orderWithStatus.StatusText</strong>
@@ -34,9 +37,10 @@
                 <div class="track-order-details">
                     <OrderReview Order="@orderWithStatus.Order" />
                 </div>
-                <div class="track-order-map">
+                @* <div class="track-order-map">
                     <Map Zoom="13" Markers="@orderWithStatus.MapMarkers" />
-                </div>
+                </div> *@
+                <div id="map" style="width:800px; height:600px;"></div>
             </div>
         </div>
     }
@@ -54,14 +58,11 @@
         // If we were already polling for a different order, stop doing so
         pollingCancellationToken?.Cancel();
 
-         // Start a new poll loop
+        //  Start a new poll loop
         await PollForUpdates();
     }
 
-    void IDisposable.Dispose()
-    {
-        pollingCancellationToken?.Cancel();
-    }
+    void IDisposable.Dispose() => pollingCancellationToken?.Cancel();
 
     private async Task PollForUpdates()
     {
@@ -84,6 +85,32 @@
             StateHasChanged();
 
             await Task.Delay(4000);
+        }
+    }
+
+
+
+    private IJSObjectReference? module;
+    private string? result;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var client = new HttpClient();
+            var raw = await client.GetStringAsync("https://localhost:7086/geojson.json");
+            raw = raw.Replace('\n', ' ');
+            module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./leafletmap.js");//   ./leaflet/deliveryMap.js
+            if (module != null)
+            {
+                result = await module.InvokeAsync<string>("load_map", Convert.ToString(raw));
+            }
+        }
+    }
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (module is not null)
+        {
+            await module.DisposeAsync();
         }
     }
 }

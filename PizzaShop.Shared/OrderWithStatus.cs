@@ -1,4 +1,5 @@
-﻿using BlazingPizza.ComponentsLibrary.Map;
+﻿
+using BlazingPizza.ComponentsLibrary1.Map;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,11 @@ namespace PizzaShop.Shared
 {
     public class OrderWithStatus
     {
-        public Order? Order { get; set; }
+        public Order? Order { get; set; } = new Order();
 
         public string? StatusText { get; set; }
 
-        public List<Marker>? MapMarkers { get; set; }
-
+        public List<Marker>? MapMarkers { get; set; } = new();
         public static OrderWithStatus FromOrder(Order order)
         {
             // To simulate a real backend process, we fake status updates based on the amount

@@ -14,9 +14,9 @@ namespace PizzaShop.Shared
         public string? UserId { get; set; }
 
         public DateTime CreatedTime { get; set; }
-        public Address DeliveryAddress { get; set; } 
-        public LatLong DeliveryLocation { get; set; }
-        public List<Pizza> Pizzas { get; set; } = new List<Pizza>();
+        public Address? DeliveryAddress { get; set; } = new Address();
+        public LatLong? DeliveryLocation { get; set; } = new LatLong();  
+        public List<Pizza>? Pizzas { get; set; } = new List<Pizza>();
 
         public decimal GetTotalPrice() => Pizzas.Sum(p => p.GetTotalPrice());
 

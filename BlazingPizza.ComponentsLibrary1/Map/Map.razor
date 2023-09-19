@@ -1,0 +1,19 @@
+﻿@using Microsoft.JSInterop
+@inject IJSRuntime JsRuntime
+@page "/"
+
+<div id="@_elementId" style="height: 100%; width: 100%;"></div>
+
+@functions {
+    string _elementId = $"map-{Guid.NewGuid():D}";
+
+    [Parameter] public double Zoom { get; set; }
+    [Parameter] public List<Marker> Markers { get; set; }
+    protected async Task OnAfterRenderAsync()
+    {
+        await JsRuntime.InvokeAsync<object>(
+            "deliveryMap.showOrUpdate",
+            _elementId,
+            Markers);
+    }
+}

@@ -1,0 +1,35 @@
+﻿@inject IJSRuntime js
+<div class="user-info">
+    <AuthorizeView>
+        <Authorizing>
+            <text>...</text>
+        </Authorizing>
+        <Authorized>
+            <img src="img/user.svg" />
+            <div>
+                <span class="username">@context.User.Identity.Name</span>
+                <a class="sign-out" href="user/signout">Sign out</a>
+            </div>
+
+            <br /><br />
+            <button class="btn btn-outline-primary" @onclick="DisplayGeetingAlert">Display Greeting Alert</button>
+
+        </Authorized>
+        <NotAuthorized>
+            <a class="sign-in" href="user/signin">Sign in</a>
+        </NotAuthorized>
+      
+            
+    </AuthorizeView>
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationState { get; set; } // Nhận trạng thái xác thực của ng dùng
+    private async Task DisplayGeetingAlert() // Hiển thị cảnh báo khi ấn vào nút
+    {
+        var authState = await authenticationState;
+        var message = $"Hello {authState.User.Identity.Name}";
+        await js.InvokeVoidAsync("alert", message); // Cảnh báo IJSRuntime
+    }
+}

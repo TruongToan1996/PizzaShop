@@ -1,23 +1,16 @@
-﻿﻿@using Microsoft.JSInterop
-@inject IJSRuntime JSRuntime
+﻿@using Microsoft.JSInterop
+@inject IJSRuntime jsRuntime
 
 <div id="@elementId" style="height: 100%; width: 100%;"></div>
 
-@code {
+@functions {
     string elementId = $"map-{Guid.NewGuid().ToString("D")}";
 
     [Parameter] public double Zoom { get; set; }
-    [Parameter] public List<Marker> Markers { get; set; }
+    [Parameter] public List<Marker> markers { get; set; } = new();
 
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected async override Task OnAfterRenderAsync(bool isFirst)
     {
-            await JSRuntime.InvokeAsync<object>(
-            "deliveryMap.showOrUpdate",
-            elementId,
-            Markers);
-        
+        await jsRuntime.InvokeVoidAsync("window.deliveryMap.showOrUpdate",elementId, markers);
     }
 }
-
-

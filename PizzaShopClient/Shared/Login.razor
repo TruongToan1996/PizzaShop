@@ -1,0 +1,61 @@
+﻿@page "/user/signin"
+@using PizzaShop.Shared;
+@using PizzaShopClient.Authentication;
+
+@using Microsoft.AspNetCore.Components.Web
+@using PizzaShopClient.Services;
+@using Microsoft.AspNetCore.Components.Forms
+@inject HttpClient httpClient
+@inject AuthenticationStateProvider authStateProvider
+@inject NavigationManager navManager
+@inject IAccountService _accountService;
+@inject IJSRuntime js
+
+<div class="row">
+
+    <div class="col-lg-4 offset-lg-4 pt-4 boder">
+        <div class="mb-3 text-center">
+            <h3>LOGIN</h3>
+        </div>
+        <div class="mb-3">
+            <label>User Name</label>
+            <input class="from-control" @bind="@(loginRequest.UserName)" placeholder="User Name" />
+        </div>
+        <div class="mb-3">
+            <label>Password</label>
+            <input type="password" class="from-control" @bind="@(loginRequest.Password)" placeholder="Password" />
+        </div>
+        <div class="mb-3 d-grid gap-2">
+            <button onclick="@(async () => {await  Authenticate (loginRequest);})" class="btn-primary">Login</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginRequest loginRequest = new LoginRequest(); // khai báo đối tượng để tìm nạp dữ liệu từ đầu vào
+    private async Task Authenticate(LoginRequest input)  // Tạo phương thức Authenticate dc gọi khi nhấn vào đăng nhập
+    {
+       
+        if (input.UserName == null || input.Password == null) return;
+        // var loginReponse = await httpClient.PostAsJsonAsync<LoginRequest>("/api/Account/Login", loginRequest); // gọi PostAsJsonAsync để sử dụng API đăng nhập
+        var userSession = await _accountService.Login(input);
+
+
+        if(userSession == null)
+        {
+            await js.InvokeVoidAsync("alert", "Invalid User Name or Password");
+        }
+        else
+        {
+            var customAuthStateProvider = (CustomAuthenticationStateProvider)authStateProvider; // Phân tích cú pháp từ  AuthenticationStateProvider
+            await customAuthStateProvider.UpdateAuthenticationState(userSession); // goi update cung cap phiên ng dùng làm tham số
+            navManager.NavigateTo("/", true);
+        }
+        // else if (loginReponse.StatusCode == HttpStatusCode.Unauthorized) // Kiểm tra trạng thái phản hồi k dc sử dụng if khác hay k
+        // {
+        //     await js.InvokeVoidAsync("alert", "Invalid User Name or Password");
+        //     return;
+        // }
+    }
+
+}

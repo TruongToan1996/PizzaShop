@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PizzaShop.Shared;
 using PizzaShopAPI.Data;
@@ -6,7 +7,9 @@ using PizzaShopAPI.Data;
 namespace PizzaShopAPI.Controllers
 {
     [Route("api/[controller]/[action]")]
+    [Route("orders")]
     [ApiController]
+    
     public class OdersController : ControllerBase
     {
        
@@ -15,8 +18,6 @@ namespace PizzaShopAPI.Controllers
         {
             _db = db;
         }
-
-
         [HttpGet]
         public async Task<IActionResult> GetOrders() // tra ve IActionReusult
         {

@@ -16,6 +16,7 @@ namespace PizzaShop.Shared
 
         public void ShowConfigurePizzaDialog(PizzaSpecial special)
         {
+            
             ConfiguringPizza = new Pizza()
             {
                 Special = special,
